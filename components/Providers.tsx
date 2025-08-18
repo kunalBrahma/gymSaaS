@@ -1,0 +1,14 @@
+// app/components/Providers.tsx
+"use client";
+
+import { SessionProvider } from "next-auth/react";
+import { ReactNode } from "react";
+
+// Define props interface
+interface NextAuthProviderProps {
+  children: ReactNode;
+}
+
+export const NextAuthProvider = ({ children }: NextAuthProviderProps) => {
+  return <SessionProvider>{children}</SessionProvider>;
+};
