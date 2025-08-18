@@ -66,7 +66,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
       } else {
         // On success, show a message and redirect
         toast.success("Login successful!");
-        router.push("/dashboard");
+        router.push("/setup");
       }
     } catch (error) {
       toast.error("An unexpected network error occurred.");
@@ -143,7 +143,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
                   variant="outline"
                   className="w-full"
                   type="button"
-                  onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                  onClick={() => signIn("google", { callbackUrl: "/setup" })}
                 >
                   Login with Google
                 </Button>
