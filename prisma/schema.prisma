@@ -79,18 +79,19 @@ model PasswordResetToken {
 }
 
 model Gym {
-  id      String  @id @default(cuid())
+  id      String @id @default(cuid())
   name    String
   address String?
 
-  // This defines the "owner" side of the relationship
-  // It holds the foreign key `ownerId`
-  owner   User?   @relation(fields: [ownerId], references: [id])
-  ownerId String? @unique // A gym can only have one owner
+  // ADD THIS LINE
+  description String? @db.Text
 
-  subscription Subscription?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  owner   User?  @relation(fields: [ownerId], references: [id])
+  ownerId String? @unique
+
+  subscription   Subscription?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 enum SubscriptionStatus {
@@ -102,19 +103,14 @@ enum SubscriptionStatus {
 
 // NEW MODEL for subscriptions
 model Subscription {
-  id     String             @id @default(cuid())
-  gymId  String             @unique
-  status SubscriptionStatus @default(INACTIVE)
-  planId String
-
-  // Store the ID from your payment provider (e.g., Stripe)
-  providerSubscriptionId String @unique
-
-  currentPeriodStart DateTime
-  currentPeriodEnd   DateTime
-
-  gym Gym @relation(fields: [gymId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                     String             @id @default(cuid())
+  gymId                  String             @unique  
+  status                 SubscriptionStatus @default(ACTIVE)
+  planId                 String             @default("free_plan")
+  providerSubscriptionId String             @unique
+  currentPeriodStart     DateTime           @default(now())
+  currentPeriodEnd       DateTime           @default(now())
+  gym                    Gym                @relation(fields: [gymId], references: [id])
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
 }

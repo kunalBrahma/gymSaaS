@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "public"."Subscription" ALTER COLUMN "status" SET DEFAULT 'ACTIVE',
+ALTER COLUMN "planId" SET DEFAULT 'free_plan',
+ALTER COLUMN "currentPeriodStart" SET DEFAULT CURRENT_TIMESTAMP,
+ALTER COLUMN "currentPeriodEnd" SET DEFAULT CURRENT_TIMESTAMP;
