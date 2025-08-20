@@ -92,6 +92,13 @@ model Gym {
   subscription   Subscription?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  members         Member[]
+  membershipPlans MembershipPlan[]
+  
+  razorpayKeyId     String?
+  razorpayKeySecret String?
+  customFields     CustomField[]  
 }
 
 enum SubscriptionStatus {
@@ -113,4 +120,95 @@ model Subscription {
   gym                    Gym                @relation(fields: [gymId], references: [id])
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
+}
+
+model MembershipPlan {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  price        Int
+  admissionFee Int      @default(0)
+  durationMonths Int    @default(1)
+  gymId        String
+  gym          Gym      @relation(fields: [gymId], references: [id])
+  members      Member[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Member {
+  id                  String    @id @default(cuid())
+  name                String
+  email               String
+  phone               String?
+  address             String?
+  dateOfBirth         DateTime?
+  gender              String?
+  weightKg            Float?
+  heightCm            Float?
+  photoUrl            String?
+  idProofUrl          String?
+  customFields        Json?
+  joinedAt            DateTime  @default(now())
+  membershipExpiresAt DateTime?
+  updatedAt           DateTime  @updatedAt
+
+  // Relations
+  gymId               String
+  gym                 Gym       @relation(fields: [gymId], references: [id])
+  planId              String
+  plan                MembershipPlan @relation(fields: [planId], references: [id])
+  history             MembershipHistory[]
+
+  // A member's email should be unique within a single gym
+  @@unique([gymId, email])
+}
+
+model CustomField {
+  id       String   @id @default(cuid())
+  gymId    String
+  gym      Gym      @relation(fields: [gymId], references: [id])
+  name     String   // Field label, e.g., "Emergency Contact"
+  type     String   // e.g., "text", "number", "date", "select", etc.
+  options  Json?    // For select fields, options as JSON array
+  required Boolean  @default(false)
+  order    Int      // To order fields in the UI
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+}
+
+model Receipt {
+  id             String    @id @default(cuid())
+  membershipHistoryId   String            @unique  
+  membershipHistory   MembershipHistory @relation(fields: [membershipHistoryId], references: [id], onDelete: Cascade)
+  receiptNumber  String    @unique  // Unique receipt identifier
+  amount        Int
+  issuedAt      DateTime  @default(now())
+  paymentMethod String?   // e.g., "Credit Card", "Razorpay", "Cash"
+  notes         String?   // Optional notes or details
+}
+
+enum HistoryEventType {
+  JOINED
+  RENEWED
+  PLAN_CHANGED
+  MEMBERSHIP_EXPIRED
+}
+
+model MembershipHistory {
+  id                String           @id @default(cuid())
+  type              HistoryEventType // What happened? (Joined, Renewed, etc.)
+  date              DateTime         @default(now())
+  description       String           // A human-readable description, e.g., "Renewed with 'Monthly Gold' plan."
+  amountPaid        Int?             // Amount paid for this transaction
+  newExpiryDate     DateTime         // The new expiry date after this event
+  
+  // Relation to the member
+  memberId          String
+  member            Member           @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  createdAt         DateTime         @default(now())
+  receipt           Receipt?  
 }

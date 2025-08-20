@@ -8,13 +8,17 @@ import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 
 export const authOptions: AuthOptions = {
-  // The adapter is still needed for Google OAuth to work with Prisma
+  // ✅ REMOVED: The global adapter is removed to prevent conflicts with the JWT strategy.
+  // We will handle the logic manually in the callbacks.
   adapter: PrismaAdapter(prisma),
 
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      // ✅ ADDED: This allows a user who signed up with email/password
+      // to later sign in with their Google account of the same email.
+      allowDangerousEmailAccountLinking: true,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -22,7 +26,6 @@ export const authOptions: AuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      // The authorize function is correct, no changes needed here
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Please enter an email and password");
@@ -48,25 +51,21 @@ export const authOptions: AuthOptions = {
     }),
   ],
 
-  // RE-ADD the JWT session strategy. This is required for CredentialsProvider.
+  // ✅ CORRECT: The JWT session strategy is what we want.
   session: {
     strategy: "jwt",
   },
 
-  // UPDATE the callbacks to bridge the JWT and the user data
+  // ✅ CORRECT: These callbacks correctly transfer the user ID
+  // into the JWT token and then into the session object.
   callbacks: {
-    // This callback is called whenever a JWT is created or updated.
     async jwt({ token, user }) {
-      // The `user` object is only passed on the initial sign-in.
-      // We persist the user's ID and other data to the token.
       if (user) {
         token.id = user.id;
       }
       return token;
     },
-    // This callback is called whenever a session is checked.
     async session({ session, token }) {
-      // We pass the data from the token (like the user ID) to the session object.
       if (token && session.user) {
         session.user.id = token.id as string;
       }

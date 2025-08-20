@@ -14,15 +14,18 @@ import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { NavUser } from "../navuser";
 
 export function AdminSidebar() {
   const { state, isMobile } = useSidebar();
@@ -54,8 +57,8 @@ export function AdminSidebar() {
           icon: Users,
         },
         {
-          name: "Schedule",
-          href: `/dashboard/${gymId}/schedule`,
+          name: "Plans",
+          href: `/dashboard/${gymId}/plans`,
           icon: Calendar,
         },
         {
@@ -142,6 +145,10 @@ export function AdminSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
+       <SidebarFooter>
+        <NavUser />
+      </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }
