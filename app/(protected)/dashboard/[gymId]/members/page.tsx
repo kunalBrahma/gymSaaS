@@ -7,7 +7,7 @@ import { MembersClient } from "./MembersClient";
 
 /**
  * The server-side page for managing a gym's members.
- * It fetches the initial data (members and plans) and passes it to the client component.
+ * It fetches all necessary data and passes it to the client component.
  */
 export default async function MembersPage({ params }: { params: Promise<{ gymId: string }> }) {
   const session = await getServerSession(authOptions);
@@ -15,19 +15,22 @@ export default async function MembersPage({ params }: { params: Promise<{ gymId:
   const userId = session.user.id;
   const { gymId } = await params;
 
-  // Fetch the gym, its members, and its membership plans all at once.
+  // Fetch all necessary data for the page in one go
   const gym = await prisma.gym.findFirst({
     where: { id: gymId, ownerId: userId },
     include: {
       subscription: true,
       members: {
         include: {
-          plan: true, // Include the plan details for each member
+          plan: true,
         },
         orderBy: { joinedAt: 'desc' },
       },
       membershipPlans: {
         orderBy: { createdAt: 'asc' },
+      },
+      customFields: { // Fetch the custom field definitions
+        orderBy: { order: 'asc' },
       },
     },
   });
@@ -35,9 +38,6 @@ export default async function MembersPage({ params }: { params: Promise<{ gymId:
   if (!gym) redirect("/setup");
 
   const isProPlan = gym.subscription?.planId !== "free_plan";
-
-  // ✅ FIXED: Removed the hard-coded plan logic.
-  // The component now relies solely on the plans fetched from the database.
   const plans = gym.membershipPlans;
 
   return (
@@ -50,9 +50,11 @@ export default async function MembersPage({ params }: { params: Promise<{ gymId:
         </p>
       </div>
       
+      {/* ✅ UPDATED: Pass the customFields prop to the client component */}
       <MembersClient 
         initialMembers={gym.members}
         membershipPlans={plans}
+        customFields={gym.customFields}
         gymId={gymId}
         isProPlan={isProPlan}
       />

@@ -152,6 +152,7 @@ model Member {
   joinedAt            DateTime  @default(now())
   membershipExpiresAt DateTime?
   updatedAt           DateTime  @updatedAt
+  deletedAt           DateTime? // New field for soft deletes
 
   // Relations
   gymId               String
@@ -160,8 +161,8 @@ model Member {
   plan                MembershipPlan @relation(fields: [planId], references: [id])
   history             MembershipHistory[]
 
-  // A member's email should be unique within a single gym
-  @@unique([gymId, email])
+  // A member's email should be unique within a single gym (for non-deleted members)
+  @@unique([gymId, email, deletedAt])
 }
 
 model CustomField {

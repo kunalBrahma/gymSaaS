@@ -48,7 +48,7 @@ export default async function DashboardPage({
   const subscriptionStatus = await getSubscriptionStatus(gymId);
 
   // Mock data for display
-  const memberCount = 247;
+  const memberCount = 45;
   const monthlyRevenue = 45230;
   const activeSessions = 23;
   const growthRate = 12.5;

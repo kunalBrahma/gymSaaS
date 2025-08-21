@@ -66,6 +66,11 @@ export function AdminSidebar() {
           href: `/dashboard/${gymId}/equipment`,
           icon: Dumbbell,
         },
+        {
+          name: "Custom Fields",
+          href: `/dashboard/${gymId}/custom-fields`,
+          icon: Dumbbell, // Assuming Dumbbell is used for custom fields
+        },
       ],
     },
     {
